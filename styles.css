@@ -1,0 +1,15 @@
+.container {
+    display: grid;
+    height: 720px;
+    width: 480px;
+    border: solid;
+}
+
+.display {
+    border: solid;
+}
+
+button {
+    height: 40px;
+    width: 50px;
+}
