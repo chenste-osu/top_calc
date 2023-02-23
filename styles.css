@@ -1,15 +1,126 @@
 .container {
-    display: grid;
-    height: 720px;
-    width: 480px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 400px;
+    width: 250px;
     border: solid;
+    display: flex;
+    flex-direction: column;
 }
 
-.display {
+.lcd {
     border: solid;
+    height: 100px;
+}
+
+#display {
+    float: right;
+    font-size: 35px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    margin-right: 15px;
+}
+
+.buttonWrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    height: 100%;
 }
 
 button {
-    height: 40px;
-    width: 50px;
+    display: flex;
+    margin: 2px;
+    text-align: center;
+    justify-content: center;
+    font-size: 20px;
+    font-family: "Lucida Console", "Courier New", monospace;
+
+}
+
+/* row 1 */
+.clear {
+    grid-column: 1;
+    grid-row: 1;
+}
+.divide {
+    grid-column: 2;
+    grid-row: 1;
+}
+.multiply {
+    grid-column: 3;
+    grid-row: 1;
+}
+.delete {
+    grid-column: 4;
+    grid-row: 1;
+}
+
+/* row 2 */
+.seven {
+    grid-column: 1;
+    grid-row: 2;
+}
+.eight {
+    grid-column: 2;
+    grid-row: 2;
+}
+.nine {
+    grid-column: 3;
+    grid-row: 2;
+}
+.subtract {
+    grid-column: 4;
+    grid-row: 2;
+}
+
+/* row 3 */
+.four {
+    grid-column: 1;
+    grid-row: 3;
+}
+.five {
+    grid-column: 2;
+    grid-row: 3;
+}
+.six {
+    grid-column: 3;
+    grid-row: 3;
+}
+.add {
+    grid-column: 4;
+    grid-row: 3
+}
+
+/* row 4 */
+.one {
+    grid-column: 1;
+    grid-row: 4;
+}
+.two {
+    grid-column: 2;
+    grid-row: 4;
+}
+.three {
+    grid-column: 3;
+    grid-row: 4;
+}
+.operate {
+    grid-column: 4;
+    grid-row: 4 / span 5;
+}
+
+/* row 5 */
+.zero {
+    grid-column: 1;
+    grid-row: 5;
+}
+.doublezero {
+    grid-column: 2;
+    grid-row: 5;
+}
+.decimal {
+    grid-column: 3;
+    grid-row: 5;
 }
