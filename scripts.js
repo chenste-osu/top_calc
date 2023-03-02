@@ -1,7 +1,7 @@
 var memory = {
     currentNum: ["0"],
     operator: [],
-    prevNum: "0",
+    prevNum: "",
     operatorPressed: false
 };
 
@@ -19,6 +19,9 @@ function parseCurrent() {
 }
 
 function parsePrev() {
+    if (memory.prevNum === "") {
+        return "";
+    }
     let prev = parseFloat(memory.prevNum);
     if (!isNaN(prev)) {
         return prev;
@@ -40,7 +43,7 @@ function isNumEmpty() {
 }
 
 function isPrevEmpty() {
-    if (memory.prevNum == "0") {
+    if (memory.prevNum === "") {
         return true;
     } else {
         return false;
@@ -86,7 +89,7 @@ function clearOp() {
 }
 
 function clearPrev() {
-    memory.prevNum = "0";
+    memory.prevNum = "";
 }
 
 function firstZeroPop() {
@@ -96,7 +99,7 @@ function firstZeroPop() {
 }
 
 function updateDisplay(num) {
-    if (num.length > 10) {
+    if (num.toString().length > 10) {
         num = "OVERFLOW";
     }
     let display = document.getElementById("display");
@@ -121,47 +124,101 @@ function operate() {
     } else if (operator == "*") {
         result = prevnum * currentnum;
     } else if (operator == "/") {
-        result == prevnum / currentnum;
+        result = prevnum / currentnum;
     }
 
     console.log("result", result);
 
     updateDisplay(result);
     storeNum(result);
-
-    // update display needs a way to overwrite a prevnum on display
-
-    clearNum();
-
 }
 
 function clickAdd() {
-    // first need to operate on the prev 2 nums
-    // then set the current operator which can change when pressing another operator
-    // pressing equals simply evaluates the 2 nums and operator and updates display
-    if (memory.operatorPressed == true) {
+    if (memory.operatorPressed == true) { 
         storeOp("+");
         return;
     }
-    storeOp("+");
+    if (isPrevEmpty()) {
+        storeNum(parseCurrent());
+        storeOp("+");
+        setOpPress(true);
+        return;
+    }
     operate();
+    storeOp("+");
+    clearNum();
+    setOpPress(true);
 }
 
 function clickSubtract() {
-    //memory.operators.push("-");
+    if (memory.operatorPressed == true) {
+        storeOp("-");
+        return;
+    }
+    if (isPrevEmpty()) {
+        storeNum(parseCurrent());
+        storeOp("-");
+        setOpPress(true);
+        return;
+    }
+    operate();
+    storeOp("-");
+    clearNum();
+    setOpPress(true);
 }
 
 function clickMultiply() {
-    //memory.operators.push("*");
+    if (memory.operatorPressed == true) {
+        storeOp("*");
+        return;
+    }
+    if (isPrevEmpty()) {
+        storeNum(parseCurrent());
+        storeOp("*");
+        setOpPress(true);
+        return;
+    }
+    operate();
+    storeOp("*");
+    clearNum();
+    setOpPress(true);
 }
 
 function clickDivide() {
-    //memory.operators.push("/");
+    if (memory.operatorPressed == true) {
+        storeOp("/");
+        return;
+    }
+    else if (isPrevEmpty()) {
+        storeNum(parseCurrent());
+        storeOp("/");
+        setOpPress(true);
+        return;
+    }
+    else {
+        operate();
+        storeOp("/");
+        clearNum();
+        setOpPress(true);
+    }
+}
+
+function clickOperate() {
+    if (memory.operatorPressed == true) {
+        return;
+    }
+    if (isPrevEmpty()) {
+        return;
+    }
+    operate();
 }
 
 function clickNum(num) {
     if (isNumFull(9)) {
         return
+    }
+    if (memory.operatorPressed) {
+        clearNum();
     }
     setOpPress(false);
     firstZeroPop();
@@ -180,11 +237,15 @@ function clickZero(digits) {
         return;
     }
     else {
+        if (memory.operatorPressed) {
+            clearNum();
+        }
+        setOpPress(false);
         for (let i = 0; i < digits; i++) {
             memory.currentNum.push("0");
         }
     }
-    updateDisplay(memory.currentNum.join(""));
+    updateDisplay(parseCurrent());
 }
 
 function deleteNum() {
@@ -224,6 +285,10 @@ function initButtons() {
     initDelete();
     initAllClear();
     initAdd();
+    initSubtract();
+    initMultiply();
+    initDivide();
+    initOperate();
 }
 
 function initZero() {
@@ -300,6 +365,28 @@ function initAdd() {
     let add = document.getElementsByClassName("add");
     add[0].addEventListener("click", () => clickAdd());
 }
+
+function initSubtract() {
+    let subtract = document.getElementsByClassName("subtract");
+    subtract[0].addEventListener("click", () => clickSubtract());
+}
+
+function initMultiply() {
+    let multiply = document.getElementsByClassName("multiply");
+    multiply[0].addEventListener("click", () => clickMultiply());
+}
+
+function initDivide() {
+    let divide = document.getElementsByClassName("divide");
+    divide[0].addEventListener("click", () => clickDivide());
+}
+
+function initOperate() {
+    let operate = document.getElementsByClassName("operate");
+    operate[0].addEventListener("click", () => clickOperate());
+}
+
+
 
 function main() {
     initButtons();
