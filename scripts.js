@@ -2,11 +2,21 @@ var memory = {
     currentNum: ["0"],
     operator: [],
     prevNum: "",
-    operatorPressed: false
+    operatorPressed: false,
+    operatePressed: false,
+    deletePressed: false
 };
 
 function setOpPress(binary) {
     memory.operatorPressed = binary;
+}
+
+function setOperatePress(binary) {
+    memory.operatePressed = binary;
+}
+
+function setDeletePress(binary) {
+    memory.deletePressed = binary;
 }
 
 function parseCurrent() {
@@ -65,8 +75,20 @@ function isNumFull(digits) {
     return false;
 }
 
+function setCurrent(array) {
+    memory.currentNum = array;
+}
+
+function popCurrent() {
+    memory.currentNum.pop();
+}
+
 function storeNum(num) {
     memory.prevNum = num;
+}
+
+function pushNum(num) {
+    memory.currentNum.push(num);
 }
 
 function storeOp(op) {
@@ -111,12 +133,10 @@ function operate() {
     let currentnum = parseCurrent();
     let operator = parseOp();
     let result = "";
-
-    console.log("operate activated")
-    console.log("prevnum", prevnum);
-    console.log("currentnum", currentnum);
-    console.log("operator", operator);
-
+    // console.log("operate activated")
+    // console.log("prevnum", prevnum);
+    // console.log("currentnum", currentnum);
+    // console.log("operator", operator);
     if (operator == "+") {
         result = prevnum + currentnum;
     } else if (operator == "-") {
@@ -126,90 +146,48 @@ function operate() {
     } else if (operator == "/") {
         result = prevnum / currentnum;
     }
-
-    console.log("result", result);
-
+    // console.log("result", result);
     updateDisplay(result);
     storeNum(result);
 }
 
-function clickAdd() {
-    if (memory.operatorPressed == true) { 
-        storeOp("+");
-        return;
-    }
-    if (isPrevEmpty()) {
-        storeNum(parseCurrent());
-        storeOp("+");
-        setOpPress(true);
-        return;
-    }
-    operate();
-    storeOp("+");
-    clearNum();
-    setOpPress(true);
-}
-
-function clickSubtract() {
-    if (memory.operatorPressed == true) {
-        storeOp("-");
-        return;
-    }
-    if (isPrevEmpty()) {
-        storeNum(parseCurrent());
-        storeOp("-");
-        setOpPress(true);
-        return;
-    }
-    operate();
-    storeOp("-");
-    clearNum();
-    setOpPress(true);
-}
-
-function clickMultiply() {
-    if (memory.operatorPressed == true) {
-        storeOp("*");
-        return;
-    }
-    if (isPrevEmpty()) {
-        storeNum(parseCurrent());
-        storeOp("*");
-        setOpPress(true);
-        return;
-    }
-    operate();
-    storeOp("*");
-    clearNum();
-    setOpPress(true);
-}
-
-function clickDivide() {
-    if (memory.operatorPressed == true) {
-        storeOp("/");
+function clickOperator(sign) {
+    if (memory.operatorPressed) {
+        storeOp(sign);
         return;
     }
     else if (isPrevEmpty()) {
         storeNum(parseCurrent());
-        storeOp("/");
+        clearNum();
+        storeOp(sign);
         setOpPress(true);
         return;
     }
+    // if operate has been pressed, and then a delete was issued after result
+    if (memory.deletePressed) {
+        clearPrev();
+        storeNum(parseCurrent());
+        clearNum();
+        setDeletePress(false);
+    }
     else {
         operate();
-        storeOp("/");
         clearNum();
-        setOpPress(true);
+        setOperatePress(false);
     }
+    storeOp(sign);
+    setOpPress(true);
 }
 
 function clickOperate() {
-    if (memory.operatorPressed == true) {
+    if (memory.operatorPressed) {
         return;
     }
     if (isPrevEmpty()) {
         return;
     }
+    setOperatePress(true);
+    setDeletePress(false);
     operate();
 }
 
@@ -220,9 +198,14 @@ function clickNum(num) {
     if (memory.operatorPressed) {
         clearNum();
     }
+    if (memory.deletePressed) {
+        clearPrev();
+    }
     setOpPress(false);
+    setOperatePress(false);
+    setDeletePress(false);
     firstZeroPop();
-    memory.currentNum.push(num);
+    pushNum(num);
     updateDisplay(memory.currentNum.join(""));
 }
 
@@ -242,31 +225,47 @@ function clickZero(digits) {
         }
         setOpPress(false);
         for (let i = 0; i < digits; i++) {
-            memory.currentNum.push("0");
+            pushNum("0");
         }
     }
     updateDisplay(parseCurrent());
 }
 
 function deleteNum() {
-    if (isNumEmpty()) {
+    if (isNumEmpty() && isPrevEmpty()) {
         return;
     }
+    if (memory.operatePressed) {
+        // prev num (aka the result) becomes the current num
+        // the old current num becomes the new prev num
+        // console.log("delete num registered the op press");
+        let tempNum = parseCurrent();
+        let newCurrent = Array.from(String(parsePrev()), Number);
+        setCurrent(newCurrent);
+        storeNum(tempNum);
+        setOperatePress(false);
+        setDeletePress(true);
+    }
     if (memory.currentNum.length > 0) {
-        memory.currentNum.pop();
+        popCurrent();
     }
     if (memory.currentNum.length < 1) {
-        memory.currentNum.push("0");
+        pushNum("0");
     }
+    // console.log("current num", parseCurrent());
+    // console.log("prev num", parsePrev());
+    // console.log("operator", parseOp());
     updateDisplay(memory.currentNum.join(""));
 }
 
 function allClear() {
     clearNum();
-    memory.currentNum.push("0");
+    pushNum("0");
     clearOp();
     clearPrev();
-    
+    setDeletePress(false);
+    setOpPress(false);
+    setOperatePress(false);
     updateDisplay(memory.currentNum.join(""));
 }
 
@@ -363,30 +362,28 @@ function initOperate() {
 
 function initAdd() {
     let add = document.getElementsByClassName("add");
-    add[0].addEventListener("click", () => clickAdd());
+    add[0].addEventListener("click", () => clickOperator("+"));
 }
 
 function initSubtract() {
     let subtract = document.getElementsByClassName("subtract");
-    subtract[0].addEventListener("click", () => clickSubtract());
+    subtract[0].addEventListener("click", () => clickOperator("-"));
 }
 
 function initMultiply() {
     let multiply = document.getElementsByClassName("multiply");
-    multiply[0].addEventListener("click", () => clickMultiply());
+    multiply[0].addEventListener("click", () => clickOperator("*"));
 }
 
 function initDivide() {
     let divide = document.getElementsByClassName("divide");
-    divide[0].addEventListener("click", () => clickDivide());
+    divide[0].addEventListener("click", () => clickOperator("/"));
 }
 
 function initOperate() {
     let operate = document.getElementsByClassName("operate");
     operate[0].addEventListener("click", () => clickOperate());
 }
-
-
 
 function main() {
     initButtons();
