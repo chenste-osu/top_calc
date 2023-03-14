@@ -20,7 +20,6 @@ function setDeletePress(binary) {
 }
 
 function parseCurrent() {
-    // check and convert number to a float
     let curr = memory.currentNum.join("");
     curr = parseFloat(curr);
     if (!isNaN(curr)) {
@@ -121,9 +120,12 @@ function firstZeroPop() {
 }
 
 function updateDisplay(num) {
-    if (num.toString().length > 10) {
-        num = "OVERFLOW";
+    if (num == NaN) {
+        num = "ERROR";
     }
+    else if (num.toString().length > 10) {
+        num = num.toString().slice(0,10);
+    } 
     let display = document.getElementById("display");
     display.textContent = num;
 }
@@ -133,10 +135,6 @@ function operate() {
     let currentnum = parseCurrent();
     let operator = parseOp();
     let result = "";
-    // console.log("operate activated")
-    // console.log("prevnum", prevnum);
-    // console.log("currentnum", currentnum);
-    // console.log("operator", operator);
     if (operator == "+") {
         result = prevnum + currentnum;
     } else if (operator == "-") {
@@ -146,7 +144,6 @@ function operate() {
     } else if (operator == "/") {
         result = prevnum / currentnum;
     }
-    // console.log("result", result);
     updateDisplay(result);
     storeNum(result);
 }
@@ -163,7 +160,7 @@ function clickOperator(sign) {
         setOpPress(true);
         return;
     }
-    // if operate has been pressed, and then a delete was issued after result
+    // if operate has been pressed and delete is issued
     if (memory.deletePressed) {
         clearPrev();
         storeNum(parseCurrent());
@@ -238,9 +235,12 @@ function deleteNum() {
     if (memory.operatePressed) {
         // prev num (aka the result) becomes the current num
         // the old current num becomes the new prev num
-        // console.log("delete num registered the op press");
         let tempNum = parseCurrent();
-        let newCurrent = Array.from(String(parsePrev()), Number);
+        let stringNum = parsePrev().toString();
+        if (stringNum.length > 10) {
+            stringNum = stringNum.slice(0, 10);
+        }
+        let newCurrent = stringNum.split('');
         setCurrent(newCurrent);
         storeNum(tempNum);
         setOperatePress(false);
@@ -252,10 +252,14 @@ function deleteNum() {
     if (memory.currentNum.length < 1) {
         pushNum("0");
     }
-    // console.log("current num", parseCurrent());
-    // console.log("prev num", parsePrev());
-    // console.log("operator", parseOp());
     updateDisplay(memory.currentNum.join(""));
+}
+
+function clickDecimal() {
+    if (memory.currentNum.includes(".")) {
+        return;
+    }
+    clickNum(".");
 }
 
 function allClear() {
@@ -288,6 +292,7 @@ function initButtons() {
     initMultiply();
     initDivide();
     initOperate();
+    initDecimal();
 }
 
 function initZero() {
@@ -383,6 +388,11 @@ function initDivide() {
 function initOperate() {
     let operate = document.getElementsByClassName("operate");
     operate[0].addEventListener("click", () => clickOperate());
+}
+
+function initDecimal() {
+    let decimal = document.getElementsByClassName("decimal");
+    decimal[0].addEventListener("click", () => clickDecimal());
 }
 
 function main() {
